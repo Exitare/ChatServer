@@ -1,10 +1,9 @@
 import static
-import static
 
 
 class Room:
 
-    def __init__(self, room_id: str, client: any):
+    def __init__(self, room_id: str, client: any = None):
         self._clients = [client]
         self._id = room_id
 

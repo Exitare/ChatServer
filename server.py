@@ -1,6 +1,6 @@
 import socket, sys
 from threading import Thread, Event
-
+from room import Room
 import static
 from client_thread import ClientThread
 
@@ -31,6 +31,7 @@ class ClientAcceptingThread(Thread):
                     threads.append(new_thread)
 
             except BaseException as ex:
+                print(ex)
                 s.close()
 
             finally:
@@ -46,38 +47,45 @@ if __name__ == '__main__':
     accepting_thread = ClientAcceptingThread()
     accepting_thread.start()
 
-    print("Server up and running....")
-    while not shutdown:
-        command = input("Enter your command: ").strip()
+    static.rooms.append(Room("1234"))
+    try:
+        print("Server up and running....")
+        while not shutdown:
+            command = input("Enter your command: ").strip()
 
-        if command == "shutdown":
-            print("Shutting down server.")
-            shutdown = True
+            if command == "shutdown":
+                print("Shutting down server.")
+                shutdown = True
 
-            for t in threads:
-                t.stop()
+                for t in threads:
+                    t.stop()
 
-            accepting_thread.stop()
-            accepting_thread.join()
-
-
-        elif command == "test":
-            thread: ClientThread
-            for thread in threads:
-                try:
-                    thread.conn.send(b"test")
-                except:
-                    thread.active = False
-
-            threads = [thread for thread in threads if thread.active]
-
-        elif command == "rooms":
-            print(f"{static.rooms} rooms created.")
-            for room in static.rooms:
-                print(room.clients)
+                accepting_thread.stop()
+                accepting_thread.join()
 
 
+            elif command == "test":
+                thread: ClientThread
+                for thread in threads:
+                    try:
+                        thread.conn.send(b"test")
+                    except:
+                        thread.active = False
 
-    else:
-        print("Server is down...")
+                threads = [thread for thread in threads if thread.active]
+
+            elif command == "rooms":
+                print(f"{static.rooms} rooms created.")
+                for room in static.rooms:
+                    print(room.clients)
+
+
+
+        else:
+            print("Server is down...")
+            sys.exit()
+
+
+    except KeyboardInterrupt:
+        # quit
         sys.exit()
